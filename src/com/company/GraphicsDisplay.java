@@ -14,8 +14,8 @@ public class GraphicsDisplay extends JPanel {
     private Double YMax;
     private Double YMin;
     private Double scale;
-    private  Boolean showAxis;
-    private Boolean showMarkers;
+    private  Boolean showAxis = false;
+    private Boolean showMarkers = false;
     private Font axisFont;
     private BasicStroke axis; // линии осей
     private BasicStroke LineGraph; // линии графика
@@ -24,13 +24,13 @@ public class GraphicsDisplay extends JPanel {
    public GraphicsDisplay ()
    {
        setBackground(Color.WHITE);
-        LineGraph = new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+        LineGraph = new BasicStroke( 5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                 4f, new float[] {16, 4,4,4,4,4,8,4,8}, 0.0f );
         axis = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                 2f, null , 0.0f);
        MarkersLine = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                2f, null , 0.0f);
-       axisFont = new Font( Font.MONOSPACED, Font.ITALIC, 38);
+       axisFont = new Font( Font.MONOSPACED, Font.ITALIC, 25);
    }
 
     public void ShowGraphicsData (Double[][] graphicsData) {
@@ -64,6 +64,10 @@ public class GraphicsDisplay extends JPanel {
 
             }
 
+            YMin -= 3;
+            YMax += 3.0;
+            XMin -=3;
+            XMax +=3;
             double sc1 = getSize().getWidth() / (XMax - XMin);
             double sc2 = getSize().getHeight() / (YMax - YMin);
             scale = Math.min(sc1, sc2);
@@ -90,7 +94,10 @@ public class GraphicsDisplay extends JPanel {
             Paint oldPaint = canvas.getPaint();
             Font oldFont = canvas.getFont();
             GraphicsPaint(canvas);
-            canvas.setFont(oldFont);
+            axisPaint(canvas);
+
+
+        canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
             canvas.setStroke(oldStroke);
@@ -133,5 +140,54 @@ public class GraphicsDisplay extends JPanel {
        }
    canvas.draw(graphics);
 
+   }
+   protected void axisPaint (Graphics2D canvas)
+   {
+       if (showAxis)
+       {
+       canvas.setStroke(axis);
+       canvas.setColor(Color.BLACK);
+       canvas.setFont(axisFont);
+       canvas.setColor(Color.BLACK);
+      GeneralPath graphics = new GeneralPath();
+      Point2D.Double lines = xyToPoint(0.0, YMin-1);
+      graphics.moveTo(lines.getX(), lines.getY());
+      lines = xyToPoint(0.0, YMax-1);
+      graphics.lineTo(lines.getX(), lines.getY());
+       graphics.closePath();
+      lines = xyToPoint(XMin-1, 0.0);
+       graphics.moveTo(lines.getX(), lines.getY());
+       lines = xyToPoint(XMax-1, 0.0);
+       graphics.lineTo(lines.getX(), lines.getY());
+
+       canvas.draw(graphics);
+       GeneralPath arrow = new GeneralPath();
+       Point2D.Double lineEnd = xyToPoint(XMax - 3, -2.0);
+       arrow.moveTo(lineEnd.getX(), lineEnd.getY());
+       lineEnd = xyToPoint((XMax-1) ,  0.0);
+       arrow.lineTo(lineEnd.getX(), lineEnd.getY());
+       lineEnd = xyToPoint((XMax) - 3 , 2.0 );
+       arrow.lineTo(lineEnd.getX(), lineEnd.getY());
+       lineEnd = xyToPoint(XMax - 2, 2.0) ;
+
+       canvas.drawString("x", (float) lineEnd.getX() - 10, (float) lineEnd.getY());
+       canvas.draw(arrow);
+     canvas.fill (arrow);
+
+       GeneralPath arrowY = new GeneralPath();
+       Point2D.Double lineEndY = xyToPoint( -2.0, YMax - 3);
+       arrowY.moveTo(lineEndY.getX(), lineEndY.getY());
+       lineEndY = xyToPoint( 0.0, YMax - 1);
+       arrowY.lineTo(lineEndY.getX(), lineEndY.getY());
+       lineEndY = xyToPoint(  2.0, (YMax) - 3 );
+
+       arrowY.lineTo(lineEndY.getX(), lineEndY.getY());
+       lineEndY = xyToPoint (-7.0 , YMax-5.0);
+
+
+       canvas.draw(arrowY);
+       canvas.drawString("y", (float) lineEndY.getX()  , (float) (lineEndY.getY()) ) ;
+       canvas.fill (arrowY);
+   }
    }
 }

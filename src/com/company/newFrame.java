@@ -14,7 +14,7 @@ public class newFrame extends JFrame {
     private static final int HEIGHT = 500;
     private JFileChooser FileChooser = null;
     private GraphicsDisplay display = new GraphicsDisplay();
-
+    private JCheckBoxMenuItem AxisCheck;
     public newFrame (){
     super ("График");
         setSize(WIDTH,HEIGHT);
@@ -24,7 +24,9 @@ public class newFrame extends JFrame {
         JMenuBar fileMenu = new JMenuBar();
         setJMenuBar(fileMenu);
         JMenu fileName = new JMenu("Файл");
+        JMenu gr = new JMenu( "График");
         fileMenu.add(fileName);
+        fileMenu.add (gr);
         Action openFile = new AbstractAction("Открыть файл") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -41,6 +43,16 @@ public class newFrame extends JFrame {
 
             }
         };
+        Action axis = new AbstractAction("Показать оси") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display.setShowAxis(AxisCheck.isSelected());
+
+            }
+        };
+        AxisCheck = new JCheckBoxMenuItem(axis);
+        AxisCheck.setSelected(false);
+        gr.add (AxisCheck);
         fileName.add (openFile);
         GraphicsDisplay graph = new GraphicsDisplay();
         getContentPane().add(display, BorderLayout.CENTER);
