@@ -16,7 +16,7 @@ public class newFrame extends JFrame {
     private GraphicsDisplay display = new GraphicsDisplay();
     private JCheckBoxMenuItem AxisCheck;
     private JCheckBoxMenuItem MarkersCheck;
-
+    private JCheckBoxMenuItem SortCheck;
     public newFrame (){
     super ("График");
         setSize(WIDTH,HEIGHT);
@@ -70,8 +70,16 @@ public class newFrame extends JFrame {
         MarkersCheck.setSelected(false);
         gr.add (MarkersCheck);
 
+        Action sort = new AbstractAction("Включить сортировку") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display.setShowSort(SortCheck.isSelected());
+            }
 
-
+        };
+        SortCheck = new JCheckBoxMenuItem(sort);
+        SortCheck.setSelected(false);
+        gr.add (SortCheck);
 
     }
 protected void openGraphicsFile (File sel_file)

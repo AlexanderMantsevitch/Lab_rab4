@@ -17,10 +17,12 @@ public class GraphicsDisplay extends JPanel {
     private Double scale;
     private  Boolean showAxis = false;
     private Boolean showMarkers = false;
+    private  Boolean showSort = false;
     private Font axisFont;
     private BasicStroke axis; // линии осей
     private BasicStroke LineGraph; // линии графика
     private BasicStroke MarkersLine; // линии для прорисовки маркеров
+    private BasicStroke NetLine;
 
    public GraphicsDisplay ()
    {
@@ -32,6 +34,8 @@ public class GraphicsDisplay extends JPanel {
        MarkersLine = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                1f, null , 0.0f);
        axisFont = new Font( Font.MONOSPACED, Font.ITALIC, 25);
+       NetLine = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+               1f, new float[] {2,2} , 0.0f);
    }
 
     public void ShowGraphicsData (Double[][] graphicsData) {
@@ -45,6 +49,10 @@ public class GraphicsDisplay extends JPanel {
     }
     public void setShowMarkers(boolean showMarkers) {
         this.showMarkers = showMarkers;
+        repaint();
+    }
+    public void setShowSort(boolean showSort) {
+        this.showSort = showSort;
         repaint();
     }
 
@@ -97,7 +105,7 @@ public class GraphicsDisplay extends JPanel {
             GraphicsPaint(canvas);
             axisPaint(canvas);
             PaintMarkers(canvas);
-
+            SortValues(canvas);
         canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
@@ -150,6 +158,7 @@ public class GraphicsDisplay extends JPanel {
        canvas.setColor(Color.BLACK);
        canvas.setFont(axisFont);
        canvas.setColor(Color.BLACK);
+       Double icrement = 0.1* (YMax - YMin)/GraphicsData.length ;
       GeneralPath graphics = new GeneralPath();
       Point2D.Double lines = xyToPoint(0.0, YMin-1);
       graphics.moveTo(lines.getX(), lines.getY());
@@ -163,27 +172,27 @@ public class GraphicsDisplay extends JPanel {
 
        canvas.draw(graphics);
        GeneralPath arrow = new GeneralPath();
-       Point2D.Double lineEnd = xyToPoint(XMax - 3, -2.0);
+       Point2D.Double lineEnd = xyToPoint(XMax - 3* icrement, -2.0* icrement);
        arrow.moveTo(lineEnd.getX(), lineEnd.getY());
-       lineEnd = xyToPoint((XMax-1) ,  0.0);
+       lineEnd = xyToPoint((XMax) ,  0.0);
        arrow.lineTo(lineEnd.getX(), lineEnd.getY());
-       lineEnd = xyToPoint((XMax) - 3 , 2.0 );
+       lineEnd = xyToPoint((XMax) - 3 * icrement, 2.0 * icrement);
        arrow.lineTo(lineEnd.getX(), lineEnd.getY());
-       lineEnd = xyToPoint(XMax - 2, 2.0) ;
+       lineEnd = xyToPoint(XMax - 3* icrement, 3.0* icrement) ;
 
        canvas.drawString("x", (float) lineEnd.getX() - 10, (float) lineEnd.getY());
        canvas.draw(arrow);
      canvas.fill (arrow);
 
        GeneralPath arrowY = new GeneralPath();
-       Point2D.Double lineEndY = xyToPoint( -2.0, YMax - 3);
+       Point2D.Double lineEndY = xyToPoint( -2.0* icrement, YMax - 3* icrement);
        arrowY.moveTo(lineEndY.getX(), lineEndY.getY());
-       lineEndY = xyToPoint( 0.0, YMax - 1);
+       lineEndY = xyToPoint( 0.0, YMax - 1* icrement);
        arrowY.lineTo(lineEndY.getX(), lineEndY.getY());
-       lineEndY = xyToPoint(  2.0, (YMax) - 3 );
+       lineEndY = xyToPoint(  2.0* icrement, (YMax) - 3* icrement );
 
        arrowY.lineTo(lineEndY.getX(), lineEndY.getY());
-       lineEndY = xyToPoint (-7.0 , YMax-5.0);
+       lineEndY = xyToPoint (-10.0* icrement , YMax-8.0* icrement);
 
 
        canvas.draw(arrowY);
@@ -221,6 +230,48 @@ public class GraphicsDisplay extends JPanel {
 
     }
 
+    protected void SortValues (Graphics2D canvans)
+    {
+        if (showSort) {
+            for (Double[] point : GraphicsData) {
+                Double pred = 0.0;
+                Boolean condition = true;
+                Double savePoint = point[1];
+                while (savePoint >= 1) {
+
+                    if (savePoint % 10 < pred) {
+                        condition = false;
+                        break;
+                    }
+                    pred = savePoint % 10;
+                    savePoint /= 10;
+                }
+
+                if (condition) {
+                    canvans.setColor(Color.YELLOW);
+                    canvans.setStroke(MarkersLine);
+                    canvans.setPaint(Color.YELLOW);
+
+                    Point2D.Double center = xyToPoint(point[0], point[1]);
+                    GeneralPath marker = new GeneralPath();
+                    marker.moveTo(center.getX() - 5, center.getY() - 5);
+                    marker.lineTo(center.getX() + 5, center.getY() + 5);
+                    marker.moveTo(center.getX() - 5, center.getY() + 5);
+                    marker.lineTo(center.getX() + 5, center.getY() - 5);
+                    marker.moveTo(center.getX(), center.getY() + 5);
+                    marker.lineTo(center.getX(), center.getY() - 5);
+                    marker.moveTo(center.getX() + 5, center.getY());
+                    marker.lineTo(center.getX() - 5, center.getY());
 
 
+                    canvans.draw(marker); // Начертить контур маркера
+
+
+                }
+
+            }
+        }
+    }
+
+    protected void SetNetLine (Graphics2D canvas)
 }
