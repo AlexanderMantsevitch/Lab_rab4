@@ -73,10 +73,6 @@ public class GraphicsDisplay extends JPanel {
 
             }
 
-            YMin -= 3;
-            YMax += 3.0;
-            XMin -=3;
-            XMax +=3;
             double sc1 = getSize().getWidth() / (XMax - XMin);
             double sc2 = getSize().getHeight() / (YMax - YMin);
             scale = Math.min(sc1, sc2);
@@ -106,6 +102,7 @@ public class GraphicsDisplay extends JPanel {
             axisPaint(canvas);
             PaintMarkers(canvas);
             SortValues(canvas);
+            SetNetLine(canvas);
         canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
@@ -160,14 +157,14 @@ public class GraphicsDisplay extends JPanel {
        canvas.setColor(Color.BLACK);
        Double icrement = 0.1* (YMax - YMin)/GraphicsData.length ;
       GeneralPath graphics = new GeneralPath();
-      Point2D.Double lines = xyToPoint(0.0, YMin-1);
+      Point2D.Double lines = xyToPoint(0.0, YMin);
       graphics.moveTo(lines.getX(), lines.getY());
-      lines = xyToPoint(0.0, YMax-1);
+      lines = xyToPoint(0.0, YMax);
       graphics.lineTo(lines.getX(), lines.getY());
        graphics.closePath();
-      lines = xyToPoint(XMin-1, 0.0);
+      lines = xyToPoint(XMin, 0.0);
        graphics.moveTo(lines.getX(), lines.getY());
-       lines = xyToPoint(XMax-1, 0.0);
+       lines = xyToPoint(XMax, 0.0);
        graphics.lineTo(lines.getX(), lines.getY());
 
        canvas.draw(graphics);
@@ -274,4 +271,25 @@ public class GraphicsDisplay extends JPanel {
     }
 
     protected void SetNetLine (Graphics2D canvas)
+    {
+        canvas.setColor(Color.BLACK);
+        canvas.setStroke(NetLine);
+        GeneralPath lines = new GeneralPath();
+        for (Double i = YMin; i <= YMax; i += (YMax - YMin)/10)
+        {
+            Point2D.Double coord = xyToPoint(XMax, i);
+            lines.moveTo(coord.getX(), coord.getY());
+            coord = xyToPoint(XMin, i);
+            lines.lineTo(coord.getX(),coord.getY());
+        }
+        for (Double i = XMin; i <= XMax; i += (XMax - XMin)/10)
+        {
+            Point2D.Double coord = xyToPoint(i, YMax);
+            lines.moveTo(coord.getX(), coord.getY());
+            coord = xyToPoint( i, YMin);
+            lines.lineTo(coord.getX(),coord.getY());
+        }
+      canvas.draw(lines);
+
+    }
 }

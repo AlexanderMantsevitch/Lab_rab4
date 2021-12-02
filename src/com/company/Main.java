@@ -11,14 +11,14 @@ public class Main {
                 try {
                     DataOutputStream out = new DataOutputStream(new FileOutputStream("coordinates.bin"));
                     double x = -10.0;
-                    double y =  0.5 * Math.pow(x, 2);
+                    double y =  0.2 * Math.pow(x, 2);
                     for (int i = 0; i <= 20; i++) {
                         out.writeDouble(x);
 
                         out.writeDouble(y);
 
                         x += 1;
-                        y = 0.5 * Math.pow(x, 2);
+                        y = 0.2 * Math.pow(x, 2);
                     }
                     out.close();
                 } catch (FileNotFoundException e) {
