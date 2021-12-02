@@ -2,6 +2,7 @@ package com.company;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
@@ -28,8 +29,8 @@ public class GraphicsDisplay extends JPanel {
                 4f, new float[] {16, 4,4,4,4,4,8,4,8}, 0.0f );
         axis = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                 2f, null , 0.0f);
-       MarkersLine = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
-               2f, null , 0.0f);
+       MarkersLine = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+               1f, null , 0.0f);
        axisFont = new Font( Font.MONOSPACED, Font.ITALIC, 25);
    }
 
@@ -95,7 +96,7 @@ public class GraphicsDisplay extends JPanel {
             Font oldFont = canvas.getFont();
             GraphicsPaint(canvas);
             axisPaint(canvas);
-
+            PaintMarkers(canvas);
 
         canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
@@ -189,5 +190,37 @@ public class GraphicsDisplay extends JPanel {
        canvas.drawString("y", (float) lineEndY.getX()  , (float) (lineEndY.getY()) ) ;
        canvas.fill (arrowY);
    }
+
    }
+    protected void PaintMarkers (Graphics2D canvas)
+    {
+        if (showMarkers) {
+            canvas.setColor(Color.RED);
+            canvas.setStroke(MarkersLine);
+            canvas.setPaint(Color.RED);
+            for (Double[] point : GraphicsData) {
+
+
+                Point2D.Double center = xyToPoint(point[0], point[1]);
+                GeneralPath marker = new GeneralPath();
+                marker.moveTo(center.getX() - 5, center.getY() - 5);
+                marker.lineTo(center.getX() + 5, center.getY() + 5);
+                marker.moveTo(center.getX() - 5, center.getY() + 5);
+                marker.lineTo(center.getX() + 5, center.getY() - 5);
+                marker.moveTo(center.getX(), center.getY() + 5);
+                marker.lineTo(center.getX(), center.getY() - 5);
+                marker.moveTo(center.getX() + 5, center.getY());
+                marker.lineTo(center.getX() - 5, center.getY());
+
+
+                canvas.draw(marker); // Начертить контур маркера
+                canvas.fill(marker); // Залить внутреннюю область маркера
+            }
+        }
+
+
+    }
+
+
+
 }

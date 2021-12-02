@@ -15,6 +15,8 @@ public class newFrame extends JFrame {
     private JFileChooser FileChooser = null;
     private GraphicsDisplay display = new GraphicsDisplay();
     private JCheckBoxMenuItem AxisCheck;
+    private JCheckBoxMenuItem MarkersCheck;
+
     public newFrame (){
     super ("График");
         setSize(WIDTH,HEIGHT);
@@ -57,8 +59,16 @@ public class newFrame extends JFrame {
         GraphicsDisplay graph = new GraphicsDisplay();
         getContentPane().add(display, BorderLayout.CENTER);
 
+       Action markers = new AbstractAction("Показать маркеры") {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               display.setShowMarkers(MarkersCheck.isSelected());
+           }
 
-
+       };
+        MarkersCheck = new JCheckBoxMenuItem(markers);
+        MarkersCheck.setSelected(false);
+        gr.add (MarkersCheck);
 
 
 
