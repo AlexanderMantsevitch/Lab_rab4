@@ -13,7 +13,7 @@ public class newFrame extends JFrame {
     private static final int WIDTH = 700;
     private static final int HEIGHT = 500;
     private JFileChooser FileChooser = null;
-
+    private GraphicsDisplay display = new GraphicsDisplay();
 
     public newFrame (){
     super ("График");
@@ -43,7 +43,7 @@ public class newFrame extends JFrame {
         };
         fileName.add (openFile);
         GraphicsDisplay graph = new GraphicsDisplay();
-
+        getContentPane().add(display, BorderLayout.CENTER);
 
 
 
@@ -69,10 +69,15 @@ protected void openGraphicsFile (File sel_file)
     }
 
     if (data!=null && data.length>0) {
-        for (int j = 0; j < data.length; j++){
+      /*  for (int j = 0; j < data.length; j++){
         System.out.println(data[j][0]);
         System.out.println(data[j][1]);
          }
+
+       */
+
+        display.ShowGraphicsData(data);
+
     }
 
     in.close();
