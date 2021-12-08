@@ -5,6 +5,8 @@ package com.company;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.io.*;
 import java.util.Scanner;
 
@@ -17,6 +19,7 @@ public class newFrame extends JFrame {
     private JCheckBoxMenuItem AxisCheck;
     private JCheckBoxMenuItem MarkersCheck;
     private JCheckBoxMenuItem SortCheck;
+    private JCheckBoxMenuItem NetCheck;
     public newFrame (){
     super ("График");
         setSize(WIDTH,HEIGHT);
@@ -80,6 +83,15 @@ public class newFrame extends JFrame {
         SortCheck = new JCheckBoxMenuItem(sort);
         SortCheck.setSelected(false);
         gr.add (SortCheck);
+        Action Net = new AbstractAction("Включить сетку") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display.setShowNet(NetCheck.isSelected());
+            }
+        };
+        NetCheck = new JCheckBoxMenuItem(Net);
+        NetCheck.setSelected(false);
+        gr.add (NetCheck);
 
     }
 protected void openGraphicsFile (File sel_file)

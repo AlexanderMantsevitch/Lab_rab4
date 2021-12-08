@@ -10,15 +10,19 @@ public class Main {
             {
                 try {
                     DataOutputStream out = new DataOutputStream(new FileOutputStream("coordinates.bin"));
-                    double x = -10.0;
-                    double y =  0.2 * Math.pow(x, 2);
-                    for (int i = 0; i <= 20; i++) {
+                    //double x = -10;
+                    double x = -5 * Math.PI;
+                   // double y =  1 * Math.pow(x, 2)  ;
+                    double y = 10 * Math.sin(x);
+                    for (int i = 0; i <= 40; i++) {
                         out.writeDouble(x);
 
                         out.writeDouble(y);
 
-                        x += 1;
-                        y = 0.2 * Math.pow(x, 2);
+                        x += Math.PI /4;
+                      //  x+= 1.0;
+                     //   y = 1 * Math.pow(x, 2) ;
+                        y = 10 * Math.sin(x);
                     }
                     out.close();
                 } catch (FileNotFoundException e) {
@@ -27,6 +31,7 @@ public class Main {
                 } catch (IOException e) {
                 }
             }
+
             a.setVisible(true);
     a.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

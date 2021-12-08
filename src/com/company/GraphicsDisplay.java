@@ -2,27 +2,40 @@ package com.company;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 
 
-public class GraphicsDisplay extends JPanel {
+public class GraphicsDisplay extends JPanel implements MouseMotionListener
+{
 
     private  Double [][] GraphicsData = null;
-    private Double XMin;
-    private Double XMax;
-    private Double YMax;
-    private Double YMin;
-    private Double scale;
+    private Double XMin = 0.0;
+    private Double XMax= 0.0;
+    private Double YMax= 0.0;
+    private Double YMin= 0.0;
+    private Double scale = 0.0;
     private  Boolean showAxis = false;
     private Boolean showMarkers = false;
     private  Boolean showSort = false;
+    private  Boolean showNet = false;
     private Font axisFont;
     private BasicStroke axis; // линии осей
     private BasicStroke LineGraph; // линии графика
     private BasicStroke MarkersLine; // линии для прорисовки маркеров
     private BasicStroke NetLine;
+    private int mouseX = 0; private int mouseY = 0;
+    private String msg = " ";
+    private DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance();
 
    public GraphicsDisplay ()
    {
@@ -36,6 +49,36 @@ public class GraphicsDisplay extends JPanel {
        axisFont = new Font( Font.MONOSPACED, Font.ITALIC, 25);
        NetLine = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                1f, new float[] {2,2} , 0.0f);
+
+       MouseAdapter MouseEvents = new MouseAdapter() {
+
+
+
+           @Override
+           public void mouseClicked(MouseEvent e) {
+               super.mouseClicked(e);
+               System.out.println("ffff");
+           }
+
+           @Override
+           public void mousePressed(MouseEvent e) {
+               super.mousePressed(e);
+           }
+
+           @Override
+           public void mouseReleased(MouseEvent e) {
+               super.mouseReleased(e);
+           }
+
+
+       };
+       addMouseMotionListener(this);
+       formatter.setMinimumFractionDigits(5);
+       formatter.setGroupingUsed(false);
+
+       DecimalFormatSymbols dottedDouble = formatter.getDecimalFormatSymbols();
+       dottedDouble.setDecimalSeparator('.');
+       formatter.setDecimalFormatSymbols(dottedDouble);
    }
 
     public void ShowGraphicsData (Double[][] graphicsData) {
@@ -53,6 +96,10 @@ public class GraphicsDisplay extends JPanel {
     }
     public void setShowSort(boolean showSort) {
         this.showSort = showSort;
+        repaint();
+    }
+    public void setShowNet(boolean showNet) {
+        this.showNet = showNet;
         repaint();
     }
 
@@ -91,7 +138,7 @@ public class GraphicsDisplay extends JPanel {
                 YMax+=yIncrement;
                 YMin-=yIncrement;
             }
-        System.out.println(getSize());
+       // System.out.println(getSize());
 
             Graphics2D canvas = (Graphics2D) g;
             Stroke oldStroke = canvas.getStroke();
@@ -103,6 +150,17 @@ public class GraphicsDisplay extends JPanel {
             PaintMarkers(canvas);
             SortValues(canvas);
             SetNetLine(canvas);
+        canvas.setColor(Color.RED);
+
+        if (mouseY > 11 && mouseX < getWidth() - 30)
+        canvas.drawString(msg, mouseX + 5, mouseY);
+        else if (mouseY <= 11 && mouseX <= getWidth() - 50)
+        canvas.drawString(msg, mouseX+ 10, mouseY+20);
+        else if(mouseY >= 11 && mouseX >= getWidth() - 50)
+            canvas.drawString(msg, mouseX- msg.length()*6, mouseY);
+        else if (mouseY <= 11 && mouseX >= getWidth() - 50)
+            canvas.drawString(msg, mouseX- msg.length()*6, mouseY+7);
+
         canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
@@ -193,8 +251,10 @@ public class GraphicsDisplay extends JPanel {
 
 
        canvas.draw(arrowY);
+
        canvas.drawString("y", (float) lineEndY.getX()  , (float) (lineEndY.getY()) ) ;
        canvas.fill (arrowY);
+
    }
 
    }
@@ -231,16 +291,17 @@ public class GraphicsDisplay extends JPanel {
     {
         if (showSort) {
             for (Double[] point : GraphicsData) {
-                Double pred = 0.0;
+                Double pred = 10.0;
                 Boolean condition = true;
                 Double savePoint = point[1];
-                while (savePoint >= 1) {
+                while ((Math.abs(savePoint)) >= 1) {
 
-                    if (savePoint % 10 < pred) {
+
+                    if ((Math.abs(savePoint) % 10) > pred) {
                         condition = false;
                         break;
                     }
-                    pred = savePoint % 10;
+                    pred = Math.abs(savePoint) % 10;
                     savePoint /= 10;
                 }
 
@@ -272,24 +333,59 @@ public class GraphicsDisplay extends JPanel {
 
     protected void SetNetLine (Graphics2D canvas)
     {
-        canvas.setColor(Color.BLACK);
-        canvas.setStroke(NetLine);
-        GeneralPath lines = new GeneralPath();
-        for (Double i = YMin; i <= YMax; i += (YMax - YMin)/10)
-        {
-            Point2D.Double coord = xyToPoint(XMax, i);
-            lines.moveTo(coord.getX(), coord.getY());
-            coord = xyToPoint(XMin, i);
-            lines.lineTo(coord.getX(),coord.getY());
+        if (showNet) {
+            canvas.setColor(Color.BLACK);
+            canvas.setStroke(NetLine);
+            GeneralPath lines = new GeneralPath();
+            for (Double i = YMin; i <= YMax; i += (YMax - YMin) / 10) {
+                Point2D.Double coord = xyToPoint(XMax, i);
+                lines.moveTo(coord.getX(), coord.getY());
+                coord = xyToPoint(XMin, i);
+                lines.lineTo(coord.getX(), coord.getY());
+            }
+            for (Double i = XMin; i <= XMax; i += (XMax - XMin) / 10) {
+                Point2D.Double coord = xyToPoint(i, YMax);
+                lines.moveTo(coord.getX(), coord.getY());
+                coord = xyToPoint(i, YMin);
+                lines.lineTo(coord.getX(), coord.getY());
+            }
+            canvas.draw(lines);
         }
-        for (Double i = XMin; i <= XMax; i += (XMax - XMin)/10)
-        {
-            Point2D.Double coord = xyToPoint(i, YMax);
-            lines.moveTo(coord.getX(), coord.getY());
-            coord = xyToPoint( i, YMin);
-            lines.lineTo(coord.getX(),coord.getY());
-        }
-      canvas.draw(lines);
+    }
 
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
+        if (GraphicsData != null) {
+            Boolean schet = false;
+            for (int i = 0; i < GraphicsData.length; i++) {
+                Point2D.Double point = xyToPoint(GraphicsData[i][0], GraphicsData[i][1]);
+                if (Math.abs(e.getX() - (int)point.getX()) < 12 && Math.abs (e.getY() - (int)point.getY()) < 12) {
+                    String formattedDoubleX = formatter.format(GraphicsData[i][0]);
+                    String formattedDoubleY = formatter.format(GraphicsData[i][1]);
+                    msg = "X: " + formattedDoubleX + "  " + "Y: " + formattedDoubleY;
+                    mouseX = e.getX();
+                    mouseY = e.getY();
+                    schet = true;
+                    repaint();
+
+
+                }
+                if (!schet) {
+                    msg = " ";
+                    repaint();
+                }
+
+
+
+            }
+
+        }
     }
 }
