@@ -2,10 +2,7 @@ package com.company;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -15,7 +12,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
 
-public class GraphicsDisplay extends JPanel implements MouseMotionListener
+public class GraphicsDisplay extends JPanel implements MouseMotionListener, MouseListener
 {
 
     private  Double [][] GraphicsData = null;
@@ -34,9 +31,10 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
     private BasicStroke MarkersLine; // линии для прорисовки маркеров
     private BasicStroke NetLine;
     private int mouseX = 0; private int mouseY = 0;
+    private  int pmouseX = 0; private int pmouseY = 0;
     private String msg = " ";
     private DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance();
-
+    private  Rectangle mouseRectangle = new Rectangle(0,0,0,0);
    public GraphicsDisplay ()
    {
        setBackground(Color.WHITE);
@@ -50,29 +48,16 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
        NetLine = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                1f, new float[] {2,2} , 0.0f);
 
-       MouseAdapter MouseEvents = new MouseAdapter() {
 
 
 
-           @Override
-           public void mouseClicked(MouseEvent e) {
-               super.mouseClicked(e);
-               System.out.println("ffff");
-           }
-
-           @Override
-           public void mousePressed(MouseEvent e) {
-               super.mousePressed(e);
-           }
-
-           @Override
-           public void mouseReleased(MouseEvent e) {
-               super.mouseReleased(e);
-           }
 
 
-       };
+
+
+
        addMouseMotionListener(this);
+       addMouseListener(this);
        formatter.setMinimumFractionDigits(5);
        formatter.setGroupingUsed(false);
 
@@ -150,8 +135,12 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
             PaintMarkers(canvas);
             SortValues(canvas);
             SetNetLine(canvas);
-        canvas.setColor(Color.RED);
 
+        canvas.setFont(oldFont);
+        canvas.setPaint(oldPaint);
+        canvas.setColor(oldColor);
+        canvas.setStroke(oldStroke);
+        canvas.setColor(Color.RED);
         if (mouseY > 11 && mouseX < getWidth() - 30)
         canvas.drawString(msg, mouseX + 5, mouseY);
         else if (mouseY <= 11 && mouseX <= getWidth() - 50)
@@ -165,7 +154,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
             canvas.setStroke(oldStroke);
-
+         canvas.draw(mouseRectangle);
 
 
 
@@ -353,11 +342,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
         }
     }
 
-    @Override
-    public void mouseDragged(MouseEvent e) {
 
-
-    }
 
     @Override
     public void mouseMoved(MouseEvent e) {
@@ -387,5 +372,50 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener
             }
 
         }
+   }
+    @Override
+    public void mouseDragged(MouseEvent e) {
+   mouseRectangle.setLocation(pmouseX, pmouseY);
+   mouseRectangle.setSize(e.getX() - pmouseX,e.getY() - pmouseY);
+  // mouseRectangle.setBounds(pmouseX,pmouseY,mouseX - pmouseX,mouseY - pmouseY);
+        System.out.println(mouseRectangle.getSize());
+    repaint();
+
+    }
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+       pmouseX = e.getX();
+       pmouseY = e.getY();
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+       mouseRectangle.setLocation(0,0);
+       mouseRectangle.setSize(0,0);
+
+       for (int j =0; j < GraphicsData.length; j++)
+       {
+
+       }
+       repaint();
+
+    }
+    public void mouseEntered (MouseEvent e)
+    {
+
+
+
+    }
+    public  void mouseExited (MouseEvent e)
+    {
+
+
     }
 }

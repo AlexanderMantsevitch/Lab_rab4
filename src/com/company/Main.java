@@ -13,16 +13,16 @@ public class Main {
                     //double x = -10;
                     double x = -5 * Math.PI;
                    // double y =  1 * Math.pow(x, 2)  ;
-                    double y = 10 * Math.sin(x);
-                    for (int i = 0; i <= 40; i++) {
+                    double y = 25 * Math.sin(x);
+                    for (int i = 0; i <= 100; i++) {
                         out.writeDouble(x);
 
                         out.writeDouble(y);
 
-                        x += Math.PI /4;
+                        x += 0.25;
                       //  x+= 1.0;
                      //   y = 1 * Math.pow(x, 2) ;
-                        y = 10 * Math.sin(x);
+                        y = 25 * Math.sin(x);
                     }
                     out.close();
                 } catch (FileNotFoundException e) {
