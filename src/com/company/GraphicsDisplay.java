@@ -10,12 +10,16 @@ import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 public class GraphicsDisplay extends JPanel implements MouseMotionListener, MouseListener
 {
 
     private  Double [][] GraphicsData = null;
+    private  Double [][] GraphicsDataold;
+    private LinkedList<Double[][]> DataSave = new LinkedList<>();
     private Double XMin = 0.0;
     private Double XMax= 0.0;
     private Double YMax= 0.0;
@@ -35,6 +39,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
     private String msg = " ";
     private DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance();
     private  Rectangle mouseRectangle = new Rectangle(0,0,0,0);
+    private int mouseButton;
    public GraphicsDisplay ()
    {
        setBackground(Color.WHITE);
@@ -68,6 +73,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
 
     public void ShowGraphicsData (Double[][] graphicsData) {
         GraphicsData = graphicsData;
+        DataSave.add(graphicsData);
         repaint();
 
     }
@@ -87,7 +93,11 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
         this.showNet = showNet;
         repaint();
     }
+    public void returnFile ()
+    {
+        GraphicsData = DataSave.getFirst();
 
+    }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -149,13 +159,15 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
             canvas.drawString(msg, mouseX- msg.length()*6, mouseY);
         else if (mouseY <= 11 && mouseX >= getWidth() - 50)
             canvas.drawString(msg, mouseX- msg.length()*6, mouseY+7);
+        canvas.setColor(Color.DARK_GRAY);
+        canvas.setStroke(LineGraph);
+
+        canvas.draw(mouseRectangle);
 
         canvas.setFont(oldFont);
             canvas.setPaint(oldPaint);
             canvas.setColor(oldColor);
             canvas.setStroke(oldStroke);
-         canvas.draw(mouseRectangle);
-
 
 
     }
@@ -168,6 +180,14 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
 
 
    }
+    protected Point2D.Double xyToPoint_obr (Double x, Double y)
+    {
+        Double deltaX = x/scale - XMin;
+        Double deltaY = YMax - y/scale;
+        return new Point2D.Double(deltaX, deltaY);
+
+
+    }
 
    protected  Point2D.Double shiftPoint (Point2D.Double src, Double x, Double y)
    {
@@ -224,7 +244,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
        arrow.lineTo(lineEnd.getX(), lineEnd.getY());
        lineEnd = xyToPoint(XMax - 3* icrement, 3.0* icrement) ;
 
-       canvas.drawString("x", (float) lineEnd.getX() - 10, (float) lineEnd.getY());
+       canvas.drawString("x", (float) lineEnd.getX() - 25, (float) lineEnd.getY());
        canvas.draw(arrow);
      canvas.fill (arrow);
 
@@ -241,7 +261,7 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
 
        canvas.draw(arrowY);
 
-       canvas.drawString("y", (float) lineEndY.getX()  , (float) (lineEndY.getY()) ) ;
+       canvas.drawString("y", (float) lineEndY.getX() +10 , (float) (lineEndY.getY()) +10) ;
        canvas.fill (arrowY);
 
    }
@@ -375,8 +395,15 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
    }
     @Override
     public void mouseDragged(MouseEvent e) {
-   mouseRectangle.setLocation(pmouseX, pmouseY);
-   mouseRectangle.setSize(e.getX() - pmouseX,e.getY() - pmouseY);
+       int heigthRect = 0; int widthRect = 0; int x = 0; int y = 0;
+        if (e.getX()- pmouseX < 0) {widthRect = Math.abs (e.getX() - pmouseX);  x = e.getX(); }
+        if (e.getX()- pmouseX > 0) {widthRect = Math.abs (e.getX() - pmouseX);  x = pmouseX; }
+        if (e.getY()- pmouseY < 0) {heigthRect = Math.abs (e.getY() - pmouseY);  y = e.getY(); }
+        if (e.getY()- pmouseY > 0) {heigthRect = Math.abs (e.getY() - pmouseY);  y = pmouseY; }
+
+   mouseRectangle.setLocation(x, y);
+   mouseRectangle.setSize(widthRect, heigthRect);
+
   // mouseRectangle.setBounds(pmouseX,pmouseY,mouseX - pmouseX,mouseY - pmouseY);
         System.out.println(mouseRectangle.getSize());
     repaint();
@@ -384,28 +411,93 @@ public class GraphicsDisplay extends JPanel implements MouseMotionListener, Mous
     }
     @Override
     public void mouseClicked(MouseEvent e) {
+   mouseButton = e.getButton();
+   if (mouseButton == 3 && DataSave.size ()!= 1)
+   {
+       System.out.println(DataSave.size());
+       DataSave.removeLast ();
+       System.out.println(DataSave.size());
+       GraphicsData = DataSave.getLast();
 
 
+   }
+        repaint();
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-       pmouseX = e.getX();
-       pmouseY = e.getY();
-
+      mouseButton = e.getButton();
+      if (mouseButton == 1) {
+          pmouseX = e.getX();
+          pmouseY = e.getY();
+      }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-       mouseRectangle.setLocation(0,0);
-       mouseRectangle.setSize(0,0);
+       mouseButton = e.getButton();
+       if (mouseButton == 1) {
+           Double[][] a = new Double[GraphicsData.length][];
+           int schet = 0;
+           Point2D.Double bord1 = xyToPoint_obr(0.0, mouseRectangle.getY() +
+                   mouseRectangle.getHeight());
+           Point2D.Double bord2 = xyToPoint_obr(0.0, mouseRectangle.getY() + 0.0);
+           for (int j = 0; j < GraphicsData.length; j++) {
+               a[j] = new Double[2];
+               Point2D.Double datas = xyToPoint(GraphicsData[j][0], GraphicsData[j][1]);
+               if (datas.getX() > mouseRectangle.getX() && mouseRectangle.getX() +
+                       mouseRectangle.getWidth() > datas.getX() &&
+                       datas.getY() > mouseRectangle.getY() && mouseRectangle.getY() +
+                       mouseRectangle.getHeight() > datas.getY()) {
 
-       for (int j =0; j < GraphicsData.length; j++)
-       {
+                   a[j][0] = GraphicsData[j][0];
+                   a[j][1] = GraphicsData[j][1];
+                   schet++;
+                   //System.out.println(a[j][0] + " " + a[j][1]);
 
+               } else if (datas.getX() > mouseRectangle.getX() && mouseRectangle.getX() +
+                       mouseRectangle.getWidth() > datas.getX()
+                       && datas.getY() < mouseRectangle.getY()) {
+                   a[j][0] = GraphicsData[j][0];
+                   a[j][1] = bord2.getY();
+                   // System.out.println(a[j][0] + " " + a[j][1]);
+                   schet++;
+               } else if (datas.getX() > mouseRectangle.getX() && mouseRectangle.getX() +
+                       mouseRectangle.getWidth() > datas.getX()
+                       && mouseRectangle.getY() +
+                       mouseRectangle.getHeight() < datas.getY()) {
+
+                   a[j][0] = GraphicsData[j][0];
+                   a[j][1] = bord1.getY();
+                   // System.out.println(a[j][0] + " " + a[j][1]);
+                   schet++;
+
+               }
+
+           }
+           Double[][] NewData = new Double[schet][];
+           schet = 0;
+           for (int i = 0; i < a.length; i++) {
+
+               if (a[i][0] != null) {
+                   NewData[schet] = new Double[2];
+                   NewData[schet][0] = a[i][0];
+                   NewData[schet][1] = a[i][1];
+                   schet++;
+               }
+
+           }
+
+           mouseRectangle.setLocation(0, 0);
+           mouseRectangle.setSize(0, 0);
+           if (NewData != null) {
+
+               GraphicsData = NewData;
+               DataSave.addLast(NewData);
+               System.out.println("k");
+           }
+           repaint();
        }
-       repaint();
-
     }
     public void mouseEntered (MouseEvent e)
     {

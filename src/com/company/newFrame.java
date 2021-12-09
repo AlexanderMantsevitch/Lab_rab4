@@ -30,8 +30,17 @@ public class newFrame extends JFrame {
         setJMenuBar(fileMenu);
         JMenu fileName = new JMenu("Файл");
         JMenu gr = new JMenu( "График");
+        gr.setEnabled(false);
         fileMenu.add(fileName);
         fileMenu.add (gr);
+        Action returnFile = new AbstractAction("Вернуть первоначальный вид") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display.returnFile();
+            }
+        };
+
+        returnFile.setEnabled(false);
         Action openFile = new AbstractAction("Открыть файл") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -39,7 +48,8 @@ public class newFrame extends JFrame {
                 {
                     FileChooser = new JFileChooser();
                     FileChooser.setCurrentDirectory(new File("."));
-
+                    returnFile.setEnabled(true);
+                    gr.setEnabled(true);
                 }
                 if (FileChooser.showOpenDialog(newFrame.this) ==
                         JFileChooser.APPROVE_OPTION)  openGraphicsFile(FileChooser.getSelectedFile()); ;
@@ -59,6 +69,7 @@ public class newFrame extends JFrame {
         AxisCheck.setSelected(false);
         gr.add (AxisCheck);
         fileName.add (openFile);
+        fileName.add (returnFile);
         GraphicsDisplay graph = new GraphicsDisplay();
         getContentPane().add(display, BorderLayout.CENTER);
 

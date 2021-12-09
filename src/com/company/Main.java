@@ -14,7 +14,7 @@ public class Main {
                     double x = -5 * Math.PI;
                    // double y =  1 * Math.pow(x, 2)  ;
                     double y = 25 * Math.sin(x);
-                    for (int i = 0; i <= 100; i++) {
+                    for (int i = 0; i <= 150; i++) {
                         out.writeDouble(x);
 
                         out.writeDouble(y);
